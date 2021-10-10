@@ -34,6 +34,16 @@ foods = [
 
 ]
 
+function gameStatusLog(obj){
+    ctx.fillStyle = "#156915";
+    ctx.font = "12px Consolas";
+    var lineheight = 15;
+    var lines = obj.status().split('\n');
+    
+    for (var i = 0; i<lines.length; i++)
+        ctx.fillText(lines[i], 0, 15 + (i*lineheight) ); 
+}
+
 function loopGame(){
     bg.fill();
     gameFoods.forEach(f =>{
@@ -41,11 +51,12 @@ function loopGame(){
         f.draw(true);
     })
 
+    gameStatusLog(gameFoods[0]);
     requestAnimationFrame(loopGame);
 }
 
 var bg  = new sprt(0,0,0,0,0,0);
-var q = 35;
+var q = 1;
 var gameFoods = [];
 
 for(var x = 0; x < q ; x++){
@@ -58,5 +69,11 @@ for(var x = 0; x < q ; x++){
     gameFoods.push(food);
 }
 
-console.log(gameFoods)
-loopGame()
+//console.log(gameFoods)
+loopGame();
+
+document.body.onkeyup = function(e){
+    if(e.keyCode == 32){
+        gameFoods[0].jump();
+    }
+}
