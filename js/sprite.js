@@ -1,19 +1,29 @@
-function sprt(_sx , _sy , _w , _h , _x, _y ){
+function sprt( _sprite , _sx , _sy , _sw , _sh , _x, _y , _w , _h ){
     
+    this.sprite = _sprite ,
     this.srcX  = _sx,
     this.srcY  = _sy,
-    this.w = _w, //width/largura
-    this.h = _h, //heigth / altura
+    this.srcW = _sw, //width/largura
+    this.srcH = _sh, //heigth / altura
+
+    this.w = _w ,
+    this.h = _h ,
+
     this.x = _x, 
     this.y = _y,
+    this.g = 0.9,
+    this.m = 0 , //mass / massa
+    
 
-    this.g = 0.98,
     this.v = 0 ,
     this.sv = 15 , //scape velocity
-    this.rv = 15, //rotate velocity
+
+    this.isRotating = false;
+    this.rv = 2, //rotate velocity
     this.r = 0,
     this.status = Status,
 
+    this.refresh = refresh,
     this.fill = Fill;
     this.fall = Fall;
     this.move = Move;
@@ -24,12 +34,21 @@ function sprt(_sx , _sy , _w , _h , _x, _y ){
 
 }
 
+function refresh(){
+    if(this.isRotating)
+        this.r += Math.PI / 180  * this.rv;
+    this.wg = this.g * this.m ; //weight (g * m) /peso 
+}
+
 function Status(){
     var s = `x: ${this.x} \ny: ${this.y}`;
     s += `\nv: ${this.v} \ng: ${this.g}`;
     s += `\nh: ${this.h} \ny+h: ${this.y + this.h}`;
     s += `\nsv: ${this.sv}`;
     s += `\nr: ${this.r}`;
+    s += `\nrv: ${this.rv}`;
+    s += `\nm: ${this.m}`;
+    s += `\nwg: ${this.wg}`;
     return s;
 }
 function Fill(){
@@ -39,20 +58,20 @@ function Fill(){
 
 function Fall(){
 
-    
-    this.v += this.g;
+    this.v += (this.g) *  (this.wg );
     this.y += this.v;
-    this.r += Math.PI / 180  * this.rv;
+    
+    if(this.y + this.h  > (cnv.height - table.h)){
 
-    if(this.y + this.h  > cnv.height){
-
-        this.y = cnv.height - this.h;
-        if(this.sv > this.g && this.v > this.g  ){
+        this.y = (cnv.height - table.h) - this.h;
+        if(this.sv > this.g && this.v > ((this.g) *  (this.wg ))  ){
             this.bounce();
             return;
         }
         
         this.v = 0;
+        this.isRotating = false;
+        this.rv = 0;
         this.sv = 15;
         
     }
@@ -60,8 +79,12 @@ function Fall(){
 }
 
 function Jump(){
+    
     this.v = -this.sv;
     this.sv = this.sv/2;
+    this.isRotating = true;
+    
+
 }
 
 function Bounce(){
@@ -73,17 +96,17 @@ function Move(_x ,  _y){
     this.y += _y;
 }
 
-function Draw(_rotate){
-
-    if(_rotate && this.v > 1)
+function Draw(){
+    this.refresh();
+    if(this.isRotating  || this.r > 0  )
     {
         ctx.save();
         ctx.translate(this.x + this.w / 2 , this.y + this.h / 2);
         ctx.rotate(this.r);
         ctx.drawImage(
-            sprites , 
+            this.sprite , 
             this.srcX , this.srcY ,
-            this.w , this.h , 
+            this.srcW , this.srcH , 
             -this.w / 2 , -this.h /2 , 
             this.w , this.h
         );
@@ -91,15 +114,12 @@ function Draw(_rotate){
     }else{
 
         ctx.drawImage(
-            sprites , 
+            this.sprite , 
             this.srcX , this.srcY ,
-            this.w , this.h , 
+            this.srcW , this.srcH , 
             this.x , this.y , 
             this.w , this.h
         );
     }
-
-   
-  
       
 }
